@@ -8,7 +8,7 @@ image:
   repository: sahanan05/hello-world
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "$TAG"
 
 imagePullSecrets: []
 nameOverride: ""
