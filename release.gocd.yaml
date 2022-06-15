@@ -1,0 +1,104 @@
+format_version: 10
+pipelines:
+  HELLO_WORLD_SP0_PAC:
+    group: IDFC_SPARK_SP0
+    label_template: ${COUNT}
+    lock_behavior: none
+    display_order: -1
+    environment_variables:
+      VERSION: V.1.0
+      IMAGE: sahanan05/hello-world
+    materials:
+      git-5690d5f:
+        git: git@github.com:Sahana-Nagaraja/hello_world.git
+        shallow_clone: false
+        auto_update: true
+        branch: master
+    stages:
+      - build_and_push:
+          fetch_materials: true
+          keep_artifacts: false
+          clean_workspace: false
+          approval:
+            type: manual
+            allow_only_on_success: false
+          jobs:
+            build_and_push:
+              timeout: 0
+              secure_variables:
+                DOCKER_USERNAME: AES:eT+Q82gP4x/VNgpP3p/A5A==:AzaF59VGNcdbzqms+TalSQ==
+                DOCKER_PASSWORD: AES:zSW8vJ8aioGXUvtMtrx5IQ==:fSoH5yNo/vXW5PwkyutHEg==
+              tasks:
+                - exec:
+                    arguments:
+                      - -c
+                      - echo $GO_PIPELINE_LABEL
+                    command: /bin/bash
+                    run_if: passed
+                - exec:
+                    arguments:
+                      - -c
+                      - docker build -t $IMAGE:$VERSION.$GO_PIPELINE_LABEL .
+                    command: /bin/bash
+                    working_directory: ./
+                    run_if: passed
+                - exec:
+                    arguments:
+                      - -c
+                      - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                    command: /bin/bash
+                    run_if: passed
+                - exec:
+                    arguments:
+                      - -c
+                      - docker push $IMAGE:$VERSION.$GO_PIPELINE_LABEL
+                    command: /bin/bash
+                    run_if: passed
+      - release:
+          fetch_materials: true
+          keep_artifacts: false
+          clean_workspace: false
+          approval:
+            type: success
+            allow_only_on_success: true
+          secure_variables:
+            AWS_ACCESS_KEY_ID: AES:hXjRS/znT0AFmyfBq5EBXA==:fXlh4+9eG1iOajuFbwK4YdIghNB7f/SYh/wnYfyggbw=
+            AWS_SECRET_ACCESS_KEY: AES:kCUp9Tgyp1W5AWnyFp/Rnw==:kRTtzq/nW5nP6Kef0rW7kaKvhRopfSp7GL08z5/N4hUKeWVk98A9aEpRnLTdkPFC
+            AWS_SESSION_TOKEN: AES:ocXTYWP9tVKMGdJeHclsMw==:Yybt+l0wacNZWn7NN95Szh9CdhLRk1Ezbjr72ksPvm/h8uxdaNogVaB8468g5mk18SM9Pb5sAQK2TyJfY7jn6OTq6DC5Cd6cmxBA+oxYl1QvZKVk/2sW/l7TPSo3lB5VFV65hxOdWRd36pvspaZ8sSiweJZSOUvU80gXmqtosumfGkacgxGVc37biJppxKB4ri5MG2kzwaCbfrnNcv7C7FO5S2+mhG5sE5aQke0P8AsnVaQO0T0cXwML3JF8Gj7VItwqIetqj/vU6XG08NsDnoS8JLyrSYJ4i/4WQthlzj62fO5S+qxivYS4P2M+ebsYepOVNqx94iTLdvqNLwq34iY3nRAzxEz8IOnhFVg3SNjhFWYlEzImUSbWR3uLpO9bWJKk90moNmItMMCSEBaxGxj80taFRsLavnKjwsg8gnKEvsYqWLPAGvAKqYD3ZfaDU1IfUFwldxEyI6DLBvXxweLa4wCyQI6A83m31XWoZnYxtvks8ocgfcHxrmFHmU/9hfUH0BdXbMp9kO+BiuY7BDIClU/r5dqjZ/6hINnsSjNcbDKVKUK64ZNu8U3Kbjjz+0RSH4sFOAKSIoJGi1I//YU1AFPbDquEgDjl37feyQUFqAhsJnkEagz1iDzitQkRlfg1WdzNfzspdUWHm+kOuFjGZ6qZxX5YDdNVC6YYRY3r3K2J7ZziP33qjex4oEXUYLIYmpViMkWrSk/yQvvfjHDyzgUtPZfqKkr9ljEx1v4lD9LNfQtlIP+JfW5/5bZ+OH4lQjp9etOimWrwwbvvRG3pfrl57gwOX52PK5Uptluv127W99NEDKZHHcNR1Xb6skWtgauFMdXECokalfs3C2neJZv51tbAhPajkIIhV4YmhfA8l8jIp0syDk1CExSxTxrEMDy9vbjjF7lJCT00/bBpiY5j3cwSveuNhyYptO6+UqbFtyo0PqhaPqn08fbdx4UDS7ahsxzPxdOLXb1ppMJU7X/ht4Z4RBSXjQEth/BwNhSeYRvC05D7zZarDFsV0s0ED8IaBYw3LCDYHFMsptB+sl9aVvhef8ENVDecP7g6a1PXspT6ORm0eaBB6wsy5SBnZBZ/BYNVi9IgoT1dIPPr9dDbjC0JEgT2Gb9p93QwMIVESEUoOXhCoZNPhMqqm74HY+/e7Q0Y8DayLkeau/bkY887rFRBY9LrMhmxG/gRfCdGO0fWcDJWAgXuvWzvEjGrHNTnYFJwAS0X3Alp3lYRcMenx3YdrtE09EZ0dfQmp35fJFfpL8bWEJcx0ugD
+          jobs:
+            release:
+              timeout: 0
+              tasks:
+                - exec:
+                    arguments:
+                      - -c
+                      - sed -ri 's/\$TAG/'"$VERSION.$GO_PIPELINE_LABEL"'/' values.yaml
+                    command: /bin/bash
+                    working_directory: ./hello-world-chart
+                    run_if: passed
+                - exec:
+                    arguments:
+                      - eks
+                      - --region
+                      - ap-south-1
+                      - update-kubeconfig
+                      - --name
+                      - dev-cluster
+                    command: aws
+                    run_if: passed
+                - exec:
+                    arguments:
+                      - lint
+                      - .
+                    command: helm
+                    working_directory: ./hello-world-chart
+                    run_if: passed
+                - exec:
+                    arguments:
+                      - upgrade
+                      - --install
+                      - hello-world-chart
+                      - .
+                    command: helm
+                    working_directory: ./hello-world-chart
+                    run_if: passed
