@@ -1,6 +1,6 @@
 format_version: 10
 pipelines:
-  HELLO_WORLD_SP0_PAC:
+  HELLO_WORLD_PAC:
     group: HELLO_WORLD_GROUP
     label_template: ${COUNT}
     lock_behavior: none
