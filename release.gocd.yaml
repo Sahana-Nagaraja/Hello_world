@@ -1,7 +1,7 @@
 format_version: 10
 pipelines:
   HELLO_WORLD_SP0_PAC:
-    group: IDFC_SPARK_SP0
+    group: HELLO_WORLD_GROUP
     label_template: ${COUNT}
     lock_behavior: none
     display_order: -1
@@ -10,7 +10,7 @@ pipelines:
       IMAGE: sahanan05/hello-world
     materials:
       git-5690d5f:
-        git: git@github.com:Sahana-Nagaraja/hello_world.git
+        git: git@github.com:Sahana-Nagaraja/hello_world_helm_chart.git
         shallow_clone: false
         auto_update: true
         branch: master
